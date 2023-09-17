@@ -1,0 +1,77 @@
+:root {
+    --background-color: rgb(208 200 195);
+    --modal-background-color: rgba(226, 217, 192, 0.7);
+    --text-color: #000000;
+}
+.dark-mode {
+    --background-color: #222222;
+    --modal-background-color: rgba(0, 0, 0, 0.7);
+    --text-color: #ffffff;
+}
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    overflow: hidden;
+}
+
+#modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 35vh;
+    width: 40vw;
+    margin-left: 30vw;
+    margin-top: 30vh;
+    border-radius: 6vw;
+    background-color: var(--modal-background-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+/* DARK MODE SWITCH */
+.switch {
+    z-index: 1;
+    position: fixed;
+    right: 20px;
+    top: 20px;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+input:checked+.slider {
+    background-color: #777777;
+}
+input:checked+.slider:before {
+    transform: translateX(26px);
+}
