@@ -104,9 +104,9 @@ if (!settings.da) {
   app.get(`/restart/${settings.token}`, (req, res) => { exit_task = "restart"; 
   return; res.render('simple_msg', {"launch_folder": launch_folder, "message": "Server is restarting..."}); process.exit(0) });
   app.get(`/gitpull/${settings.token}`, (req, res) => { exit_task = "gitpull"; res.render('simple_msg', {"launch_folder": launch_folder, "message": "Server is restarting after 'git pull origin main'..."}); process.exit(0) });
-  app.get(`/${launch_folder}/restart/${settings.token}`, (req, res) => { exit_task = "restart";
+  app.get(`//restart/${settings.token}`, (req, res) => { exit_task = "restart";
   return; res.render('simple_msg', {"launch_folder": launch_folder, "message": "Server is restarting..."}); process.exit(0) });
-  app.get(`/${launch_folder}/gitpull/${settings.token}`, (req, res) => { exit_task = "gitpull"; res.render('simple_msg', {"launch_folder": launch_folder, "message": "Server is restarting after 'git pull origin main'..."}); process.exit(0) });
+  app.get(`//gitpull/${settings.token}`, (req, res) => { exit_task = "gitpull"; res.render('simple_msg', {"launch_folder": launch_folder, "message": "Server is restarting after 'git pull origin main'..."}); process.exit(0) });
   
   console.log("Admin routes are enabled: /restart, /gitpull");
 
