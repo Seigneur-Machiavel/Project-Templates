@@ -8,6 +8,7 @@ const settings = {
   ar: false, // Auto restart
   token: "NzQxNzQ2NjEwNjQ0NjQwMzg4XyOg3Q5fJ9v5Kj6Y9o8z0j7z3QJYv6K3c", // admin Token
   da: false, // Disable admin token usage
+  lr: true, // Log routes
 }
 let exit_task = ""
 
@@ -21,6 +22,7 @@ for (let i = 0; i < args.length; i++) {
       const key = arg.slice(1);
       if (key == "m") { settings.m = true; continue; }
       if (key == "ar") { settings.ar = true; continue; }
+      if (key == "lr") { settings.lr = true; continue; }
 
       // Move to the next argument
       i++;
@@ -81,36 +83,34 @@ function executeServerManagerScript(exec_args = "") {
     console.log('The script ServerManager.js has been executed');
   });
 }
-// Make public version of scripts
+// Make public version of scripts in the "public_scripts" folder
 fs.readdirSync('./public_scripts').forEach(file => {
   if (file.endsWith('.js')) { create_public_version_of_script(`./public_scripts/${file}`); }
 });
 
 const app = express();
-
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
-// Route to listen subdomain (ex: localhost:4321/launch_folder)
-app.use(`/${launch_folder}`, express.static('public'));
+app.use(`/${launch_folder}`, express.static('public')); // Route to listen subdomain (ex: localhost:4321/launch_folder)
 
 // Middleware to log all GET requests
-app.use((req, res, next) => { if (req.method === 'GET') { console.log(`Received GET request for ${req.url}`); } next(); });
+// app.use((req, res, next) => { if (req.method === 'GET') { console.log(`Received GET request for ${req.url}`); } next(); });
 
 // Route to listen root domain (ex: localhost:4321) & replace "launch_folder" by the name of the folder
 app.get('/', (req, res) => { res.render('index', {"launch_folder": launch_folder}); });
 
 // Route to restart the server
 if (!settings.da) {
-  app.get(`/restart/${settings.token}`, (req, res) => { exit_task = "restart"; 
-  return; res.render('simple_msg', {"launch_folder": launch_folder, "message": "Server is restarting..."}); process.exit(0) });
-  app.get(`/gitpull/${settings.token}`, (req, res) => { exit_task = "gitpull"; res.render('simple_msg', {"launch_folder": launch_folder, "message": "Server is restarting after 'git pull origin main'..."}); process.exit(0) });
-  app.get(`//restart/${settings.token}`, (req, res) => { exit_task = "restart";
-  return; res.render('simple_msg', {"launch_folder": launch_folder, "message": "Server is restarting..."}); process.exit(0) });
-  app.get(`//gitpull/${settings.token}`, (req, res) => { exit_task = "gitpull"; res.render('simple_msg', {"launch_folder": launch_folder, "message": "Server is restarting after 'git pull origin main'..."}); process.exit(0) });
+  const restartHandler = (req, res) => { exit_task = "restart"; res.render('simple_msg', {"launch_folder": launch_folder, "message": "Server is restarting..."}); process.exit(0) }
+  const gitpullHandler = (req, res) => { exit_task = "gitpull"; res.render('simple_msg', {"launch_folder": launch_folder, "message": "Server is restarting after 'git pull origin main'..."}); process.exit(0) }
+  app.get([`/restart/${settings.token}`, `//restart/${settings.token}`], restartHandler);
+  app.get([`/gitpull/${settings.token}`, `//gitpull/${settings.token}`], gitpullHandler);
   
   console.log("Admin routes are enabled: /restart, /gitpull");
+}
 
-  // Récupérez les routes ouvertes de l'objet "app"
+// Log all routes
+function logRoutes() {
   const routes = app._router.stack.filter(layer => layer.route).map(layer => {
     return {
       path: layer.route.path,
@@ -125,6 +125,7 @@ if (!settings.da) {
     console.log('---');
   });
 }
+if (settings.lr) { logRoutes() };
 
 app.listen(settings.p, () => {
   console.log(`Server running on port ${settings.p}`);
