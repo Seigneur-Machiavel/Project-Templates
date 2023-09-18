@@ -93,16 +93,37 @@ app.use(express.static('public'));
 // Route to listen subdomain (ex: localhost:4321/launch_folder)
 app.use(`/${launch_folder}`, express.static('public'));
 
+// Middleware to log all GET requests
+app.use((req, res, next) => { if (req.method === 'GET') { console.log(`Received GET request for ${req.url}`); } next(); });
+
 // Route to listen root domain (ex: localhost:4321) & replace "launch_folder" by the name of the folder
 app.get('/', (req, res) => { res.render('index', {"launch_folder": launch_folder}); });
+
 // Route to restart the server
 if (!settings.da) {
-  app.get(`/restart/${settings.token}`, (req, res) => { exit_task = "restart"; res.render('simple_msg', {"launch_folder": launch_folder, "message": "Server is restarting..."}); process.exit(0) });
+  app.get(`/restart/${settings.token}`, (req, res) => { exit_task = "restart"; 
+  return; res.render('simple_msg', {"launch_folder": launch_folder, "message": "Server is restarting..."}); process.exit(0) });
   app.get(`/gitpull/${settings.token}`, (req, res) => { exit_task = "gitpull"; res.render('simple_msg', {"launch_folder": launch_folder, "message": "Server is restarting after 'git pull origin main'..."}); process.exit(0) });
-  app.get(`/${launch_folder}/restart/${settings.token}`, (req, res) => { exit_task = "restart"; res.render('simple_msg', {"launch_folder": launch_folder, "message": "Server is restarting..."}); process.exit(0) });
+  app.get(`/${launch_folder}/restart/${settings.token}`, (req, res) => { exit_task = "restart";
+  return; res.render('simple_msg', {"launch_folder": launch_folder, "message": "Server is restarting..."}); process.exit(0) });
   app.get(`/${launch_folder}/gitpull/${settings.token}`, (req, res) => { exit_task = "gitpull"; res.render('simple_msg', {"launch_folder": launch_folder, "message": "Server is restarting after 'git pull origin main'..."}); process.exit(0) });
   
   console.log("Admin routes are enabled: /restart, /gitpull");
+
+  // Récupérez les routes ouvertes de l'objet "app"
+  const routes = app._router.stack.filter(layer => layer.route).map(layer => {
+    return {
+      path: layer.route.path,
+      methods: Object.keys(layer.route.methods),
+    };
+  });
+  console.log('---');
+  // Affichez les routes dans la console
+  routes.forEach(route => {
+    console.log(`Path: ${route.path}`);
+    console.log(`Methods: ${route.methods.join(', ')}`);
+    console.log('---');
+  });
 }
 
 app.listen(settings.p, () => {
