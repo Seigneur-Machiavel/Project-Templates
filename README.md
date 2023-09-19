@@ -1,10 +1,28 @@
 # Project-Templates : "hello world" in 60 sec
 -------------------
-##### | Instant setup NODEJS / EJS project templates
-##### | Ready to use on VPS with rev-proxy like Nginx
+```sh
+Instant setup NODEJS / EJS project templates
+Ready to use on VPS with rev-proxy like Nginx
+```
 -------------------
 ### *PLEASE READ THIS SHORT DOCUMENTATION CARREFULLY*
 -------------------
+## NPM PACKAGE BUILT IN
+These packages are included in any of the template's folders
+```sh
++-- child_process@1.0.2
++-- ejs@3.1.9
++-- express@4.18.2
++-- fs@0.0.1
++-- path@0.12.7
++-- uglify-js@3.17.4
+`-- util@0.12.5
+```
+
+WebSocket template also include :
+```sh
+
+```
 ## SETUP
 1. Create your new project on github website
 2. Copy the content of one template folder to your empty cloned github project
