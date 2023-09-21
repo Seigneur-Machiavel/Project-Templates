@@ -1,4 +1,4 @@
-const urlprefix = ""
+const urlprefix = 
 // Dont forget to use the "urlprefix" while fetching, example :
 // .src = `${urlprefix}/sprites/cloud`
 

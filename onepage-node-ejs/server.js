@@ -57,7 +57,7 @@ function create_public_version_of_script(filePath, varName = false) {
 
   fileContent = fileContent.replace(/subdomain_prefix|env_ = 'dev'/g, (match) => {
     if (match === 'subdomain_prefix') {
-        return launch_folder != "" ? `"${launch_folder}"` : "";
+        return launch_folder != "" ? `"${launch_folder}"` : launch_folder;
     } else if (match === "env_ = 'dev'") {
         return "env_ = 'prod'";
     }
@@ -98,7 +98,7 @@ fs.readdirSync('./public_scripts').forEach(file => {
 const app = express();
 app.set('view engine', 'ejs');
 if (is_debug) { app.use(express.static('public'));
-} else { app.use(`${launch_folder}`, express.static('public')) } // Route to listen subdomain (ex: localhost:4321/launch_folder)
+} else { app.use(launch_folder, express.static('public')) } // Route to listen subdomain (ex: localhost:4321/launch_folder)
 
 // Route to listen root domain (ex: localhost:4321) & replace "launch_folder" by the name of the folder
 app.get('/', (req, res) => { res.render('index', {"launch_folder": launch_folder}); });
