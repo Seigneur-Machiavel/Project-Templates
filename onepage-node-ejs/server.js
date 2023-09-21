@@ -40,7 +40,7 @@ for (let i = 0; i < args.length; i++) {
 //#endregion ----------------------------------------------
 
 //#region - IMPORTS - MODULES - SCRIPTS PUBLIFICATION
-const launch_folder = is_debug ? "" : __dirname.split('\\').pop().split('/').pop();
+const launch_folder = is_debug ? "" : __dirname.split('\\').pop().split('/').pop(); console.log(`launch_folder: ${launch_folder}`); // Get the name of the folder where the server is launched
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
