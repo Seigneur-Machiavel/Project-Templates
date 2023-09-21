@@ -98,7 +98,7 @@ fs.readdirSync('./public_scripts').forEach(file => {
 const app = express();
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
-app.use(`/${launch_folder}`, express.static('public')) // Route to listen subdomain (ex: localhost:4321/launch_folder)
+//app.use(`/${launch_folder}`, express.static('public')) // Route to listen subdomain (ex: localhost:4321/launch_folder)
 
 // Route to listen root domain (ex: localhost:4321) & replace "launch_folder" by the name of the folder
 app.get('/', (req, res) => { res.render('index', {"launch_folder": launch_folder}); });
