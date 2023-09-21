@@ -1,4 +1,4 @@
-onepage-(node-ejs)/public/scripts/*
-onepage-(node-ejs-websocket)/public/scripts/*
-multipage-(node-ejs)/public/scripts/*
-multipage-(node-ejs-websocket)/public/scripts/*
+onepage-(node-ejs)/public/scripts
+onepage-(node-ejs-websocket)/public/scripts
+multipage-(node-ejs)/public/scripts
+multipage-(node-ejs-websocket)/public/scripts
