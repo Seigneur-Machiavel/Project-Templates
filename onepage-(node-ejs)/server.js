@@ -57,7 +57,7 @@ function create_public_version_of_script(filePath, varName = false) {
 
   fileContent = fileContent.replace(/subdomain_prefix|env_ = 'dev'/g, (match) => {
     if (match === 'subdomain_prefix') {
-        return `"${launch_folder}"`;
+        return launch_folder != "" ? `"${launch_folder}"` : "";
     } else if (match === "env_ = 'dev'") {
         return "env_ = 'prod'";
     }
