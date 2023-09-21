@@ -143,41 +143,45 @@ const server  = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 wss.on('connection', (ws, req) => {
-  const remoteAddress = req.headers['x-real-ip'] || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-  const clientIP = remoteAddress.includes(':') ? remoteAddress.split(':').pop() : remoteAddress;
+	const remoteAddress = req.headers['x-real-ip'] || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+	const clientIP = remoteAddress.includes(':') ? remoteAddress.split(':').pop() : remoteAddress;
 
-  ws.on('message', async (message) => {
-    try{
-        if (message == "ping") { ws.send("pong"); return; }
-        const data = JSON.parse(message);
-        const { jsonString, escapedCharacters } = DetectEscaping(data)
-        if (escapedCharacters.length > 0) { logToFile_and_console("escapedCharacters detected", client_vars); return false; }
+	ws.on('message', async (message) => {
+		try {
+			if (message == "ping") { ws.send("pong"); return; }
+			const data = JSON.parse(message);
+			const { jsonString, escapedCharacters } = DetectEscaping(data)
+			if (escapedCharacters.length > 0) { logToFile_and_console("escapedCharacters detected", client_vars); return false; }
 
-        const d_ = data.data;
-        if (d_ == undefined) { console.log("d_ is undefined"); return; }
+			const d_ = data.data;
+			if (d_ == undefined) { console.log("d_ is undefined"); return; }
 
-        // HANDLE DATA
-        switch (data.type) {
-          case 'log_msg':
-            console.log(`[${clientIP}] ${d_}`);
-			    // EXAMPLE OF SENDING DATA TO CLIENT
-			    ws.send(JSON.stringify({ type: 'log_msg', data: 'Hello from server' }));
-            break;
-          default:
-            break;
-        }
-    } catch (error) {
-        console.log(`Error: ${error}`);
-    }
-  });
-  ws.on('close', () => { console.log(`Client ${clientIP} is disconnected`); });
+			// HANDLE DATA
+			switch (data.type) {
+				case 'log_msg':
+					console.log(`[${clientIP}] ${d_}`);
+					// EXAMPLE OF SENDING DATA TO CLIENT
+					ws.send(JSON.stringify({ type: 'log_msg', data: 'Hello from server' }));
+					break;
+				default:
+					break;
+			}
+		} catch (error) {
+			console.log(`Error: ${error}`);
+		}
+	});
+	ws.on('close', () => { console.log(`Client ${clientIP} is disconnected`); });
 });
 
 //#endregion ----------------------------------------------
 
 // START SERVER
-app.listen(settings.p, () => {
+/*app.listen(settings.p, () => {
   console.log(`Server running on port ${settings.p}`);
+});*/
+server.listen(settings.p, () => {
+	const address = server.address();
+	console.log(`Server running and listening ${address.address}:${settings.p}`);
 });
 
 // EXIT HANDLER

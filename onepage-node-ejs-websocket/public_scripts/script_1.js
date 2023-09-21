@@ -26,17 +26,6 @@ const modal = document.getElementById('modal');
 
 //#region - SIMPLE FUNCTIONS
 function rnd(min, max) { return Math.floor(Math.random() * (max - min + 1) + min); }
-async function ping_loop() {
-	while(true) {
-		const current_timestamp = new Date().getTime()
-		// if last_ws_msg is more than 27 sec old, send 'ping' to keep the connection alive
-		if (last_msg_timestamp + 27000 < current_timestamp) {
-			ws.send('ping');
-			last_msg_timestamp = current_timestamp;
-		}
-		await new Promise(r => setTimeout(r, 1000));
-	}
-}
 //#endregion
 
 //#region - EVENT LISTENERS
@@ -57,9 +46,6 @@ if (localStorage.getItem('dark-mode') === "false") {
 const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
 const ws = new WebSocket(protocol + window.location.host);
 
-// EXAMPLE OF SENDING DATA TO SERVER
-ws.send(JSON.stringify({ type: 'log_msg', data: 'Hello from client' }));
-
 ws.onmessage = async (message) => {
 	if (message.data == "pong") { return; }
     const data = JSON.parse(message.data);
@@ -74,10 +60,23 @@ ws.onmessage = async (message) => {
 			break;
 	}
 };
-ws.onopen = () => {
+ws.onopen = async () => {
 	console.log('Socket opened');
+	let last_msg_timestamp = new Date().getTime();
+
+	// EXAMPLE OF SENDING DATA TO SERVER
+	ws.send(JSON.stringify({ type: 'log_msg', data: 'Hello from client' }));
+	
 	// start ping loop
-	ping_loop();
+	while(true) {
+		const current_timestamp = new Date().getTime()
+		// if last_ws_msg is more than 27 sec old, send 'ping' to keep the connection alive
+		if (last_msg_timestamp + 27000 < current_timestamp) {
+			ws.send('ping');
+			last_msg_timestamp = current_timestamp;
+		}
+		await new Promise(r => setTimeout(r, 1000));
+	}
 };
 ws.onclose = async () => {
 	console.log('Socket closed');
