@@ -48,6 +48,8 @@ const http = require('http');
 const WebSocket = require('ws');
 const UglifyJS = require('uglify-js');
 const { exec } = require('child_process');
+//---------------------------------------------------------
+if (!is_debug) { console.log(`launch_folder: ${launch_folder}`) }; // Get the name of the folder where the server is launched
 let exit_task = ""; // Exit task to execute when the server is exiting
 
 function create_public_version_of_script(filePath, varName = false) {
@@ -99,8 +101,8 @@ fs.readdirSync('./public_scripts').forEach(file => {
 //#region - HTTP SERVER - EXPRESS - ROUTES
 const app = express();
 app.set('view engine', 'ejs');
-if (is_debug) { app.use(express.static('public'));
-} else { app.use(`${launch_folder}`, express.static('public')) } // Route to listen subdomain (ex: localhost:4321/launch_folder)
+app.use(express.static('public'));
+//app.use(`/${launch_folder}`, express.static('public')) // Route to listen subdomain (ex: localhost:4321/launch_folder)
 
 // Route to listen root domain (ex: localhost:4321) & replace "launch_folder" by the name of the folder
 app.get('/', (req, res) => { res.render('index', {"launch_folder": launch_folder}); });
@@ -145,7 +147,6 @@ wss.on('connection', (ws, req) => {
   const clientIP = remoteAddress.includes(':') ? remoteAddress.split(':').pop() : remoteAddress;
 
   ws.on('message', async (message) => {
-    const log_weigth = true;
     try{
         if (message == "ping") { ws.send("pong"); return; }
         const data = JSON.parse(message);
@@ -159,8 +160,8 @@ wss.on('connection', (ws, req) => {
         switch (data.type) {
           case 'log_msg':
             console.log(`[${clientIP}] ${d_}`);
-			// EXAMPLE OF SENDING DATA TO CLIENT
-			ws.send(JSON.stringify({ type: 'log_msg', data: 'Hello from server' }));
+			    // EXAMPLE OF SENDING DATA TO CLIENT
+			    ws.send(JSON.stringify({ type: 'log_msg', data: 'Hello from server' }));
             break;
           default:
             break;

@@ -40,12 +40,14 @@ for (let i = 0; i < args.length; i++) {
 //#endregion ----------------------------------------------
 
 //#region - IMPORTS - MODULES - SCRIPTS PUBLIFICATION
-const launch_folder = is_debug ? "" : __dirname.split('\\').pop().split('/').pop(); console.log(`launch_folder: ${launch_folder}`); // Get the name of the folder where the server is launched
+const launch_folder = is_debug ? "" : __dirname.split('\\').pop().split('/').pop();
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
 const UglifyJS = require('uglify-js');
 const { exec } = require('child_process');
+//---------------------------------------------------------
+if (!is_debug) { console.log(`launch_folder: ${launch_folder}`) }; // Get the name of the folder where the server is launched
 let exit_task = ""; // Exit task to execute when the server is exiting
 
 function create_public_version_of_script(filePath, varName = false) {
