@@ -1,4 +1,4 @@
-const urlprefix = "light-node-ejs"
+const urlprefix = ""
 // Dont forget to use the "urlprefix" while fetching, example :
 // .src = `${urlprefix}/sprites/cloud`
 

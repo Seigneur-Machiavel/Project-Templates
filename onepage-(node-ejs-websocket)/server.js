@@ -3,11 +3,15 @@
 // THAT CAN BE USEFUL TO FOLD THE #REGION OF CODE
 
 //#region - SETTINGS - LAUNCH ARGUMENTS
+const inspector = require('inspector');
+const is_debug = inspector.url() !== undefined ? true : false;
+console.log(`is_debug: ${is_debug}`);
+
 const settings = {
   p: 4321, // Port
   m: false, // Minify scripts
   ar: false, // Auto restart
-  token: "NzQxNzQ2NjEwNjQ0NjQwMzg4XyOg3Q5fJ9v5Kj6Y9o8z0j7z3QJYv6K3c", // admin Token
+  t: "NzQxNzQ2NjEwNjQ0NjQwMzg4XyOg3Q5fJ9v5Kj6Y9o8z0j7z3QJYv6K3c", // admin Token
   da: false, // Disable admin token usage
   lr: true, // Log routes
 }
@@ -36,10 +40,12 @@ for (let i = 0; i < args.length; i++) {
 //#endregion ----------------------------------------------
 
 //#region - IMPORTS - MODULES - SCRIPTS PUBLIFICATION
-const launch_folder = __dirname.split('\\').pop().split('/').pop();
+const launch_folder = is_debug ? "" : __dirname.split('\\').pop().split('/').pop();
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
+const http = require('http');
+const WebSocket = require('ws');
 const UglifyJS = require('uglify-js');
 const { exec } = require('child_process');
 let exit_task = ""; // Exit task to execute when the server is exiting
@@ -93,19 +99,19 @@ fs.readdirSync('./public_scripts').forEach(file => {
 //#region - HTTP SERVER - EXPRESS - ROUTES
 const app = express();
 app.set('view engine', 'ejs');
-app.use(express.static('public'));
-app.use(`/${launch_folder}`, express.static('public')); // Route to listen subdomain (ex: localhost:4321/launch_folder)
+if (is_debug) { app.use(express.static('public'));
+} else { app.use(`${launch_folder}`, express.static('public')) } // Route to listen subdomain (ex: localhost:4321/launch_folder)
 
 // Route to listen root domain (ex: localhost:4321) & replace "launch_folder" by the name of the folder
 app.get('/', (req, res) => { res.render('index', {"launch_folder": launch_folder}); });
 app.get('//', (req, res) => { res.render('index', {"launch_folder": launch_folder}); });
 
 // Route to restart the server
-if (!settings.da) { // If admin token usage is not disabled
+if (!is_debug && !settings.da) { // If admin token usage is not disabled
   const restartHandler = (req, res) => { exit_task = "restart"; res.render('simple_msg', {"launch_folder": launch_folder, "message": "Server is restarting..."}); process.exit(0) }
   const gitpullHandler = (req, res) => { exit_task = "gitpull"; res.render('simple_msg', {"launch_folder": launch_folder, "message": "Server is restarting after 'git pull origin main'..."}); process.exit(0) }
-  app.get([`/restart/${settings.token}`, `//restart/${settings.token}`], restartHandler);
-  app.get([`/gitpull/${settings.token}`, `//gitpull/${settings.token}`], gitpullHandler);
+  app.get([`/restart/${settings.t}`, `//restart/${settings.t}`], restartHandler);
+  app.get([`/gitpull/${settings.t}`, `//gitpull/${settings.t}`], gitpullHandler);
   
   console.log("Admin routes are enabled: /restart, /gitpull");
 }
@@ -130,6 +136,44 @@ function logRoutes() {
 }; if (settings.lr) { logRoutes() };
 //#endregion ----------------------------------------------
 
+//#region - WEBSOCKET
+const server  = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+
+wss.on('connection', (ws, req) => {
+  const remoteAddress = req.headers['x-real-ip'] || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const clientIP = remoteAddress.includes(':') ? remoteAddress.split(':').pop() : remoteAddress;
+
+  ws.on('message', async (message) => {
+    const log_weigth = true;
+    try{
+        if (message == "ping") { ws.send("pong"); return; }
+        const data = JSON.parse(message);
+        const { jsonString, escapedCharacters } = DetectEscaping(data)
+        if (escapedCharacters.length > 0) { logToFile_and_console("escapedCharacters detected", client_vars); return false; }
+
+        const d_ = data.data;
+        if (d_ == undefined) { console.log("d_ is undefined"); return; }
+
+        // HANDLE DATA
+        switch (data.type) {
+          case 'log_msg':
+            console.log(`[${clientIP}] ${d_}`);
+			// EXAMPLE OF SENDING DATA TO CLIENT
+			ws.send(JSON.stringify({ type: 'log_msg', data: 'Hello from server' }));
+            break;
+          default:
+            break;
+        }
+    } catch (error) {
+        console.log(`Error: ${error}`);
+    }
+  });
+  ws.on('close', () => { console.log(`Client ${clientIP} is disconnected`); });
+});
+
+//#endregion ----------------------------------------------
+
 // START SERVER
 app.listen(settings.p, () => {
   console.log(`Server running on port ${settings.p}`);
@@ -148,3 +192,21 @@ process.on('exit', () => {
   executeServerManagerScript(exit_task);
   console.log(`exit_task: ${exit_task}`);
 });
+
+//#region - FUNCTIONS
+function DetectEscaping(object) {
+  const jsonString = JSON.stringify(object);
+  let escapedCharacters = [];
+
+  // Recherche des caractères d'échappement dans la chaîne JSON
+  jsonString.replace(/\\(["\\\/bfnrt$])/g, (match) => {
+    escapedCharacters.push(match);
+    return match;
+  });
+
+  return {
+    jsonString,
+    escapedCharacters
+  };
+}
+//#endregion ----------------------------------------------

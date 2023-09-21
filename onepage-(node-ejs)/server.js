@@ -3,6 +3,10 @@
 // THAT CAN BE USEFUL TO FOLD THE #REGION OF CODE
 
 //#region - SETTINGS - LAUNCH ARGUMENTS
+const inspector = require('inspector');
+const is_debug = inspector.url() !== undefined ? true : false;
+console.log(`is_debug: ${is_debug}`);
+
 const settings = {
   p: 4321, // Port
   m: false, // Minify scripts
@@ -36,7 +40,7 @@ for (let i = 0; i < args.length; i++) {
 //#endregion ----------------------------------------------
 
 //#region - IMPORTS - MODULES - SCRIPTS PUBLIFICATION
-const launch_folder = __dirname.split('\\').pop().split('/').pop();
+const launch_folder = is_debug ? "" : __dirname.split('\\').pop().split('/').pop();
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
@@ -93,15 +97,15 @@ fs.readdirSync('./public_scripts').forEach(file => {
 //#region - HTTP SERVER - EXPRESS - ROUTES
 const app = express();
 app.set('view engine', 'ejs');
-app.use(express.static('public'));
-app.use(`/${launch_folder}`, express.static('public')); // Route to listen subdomain (ex: localhost:4321/launch_folder)
+if (is_debug) { app.use(express.static('public'));
+} else { app.use(`${launch_folder}`, express.static('public')) } // Route to listen subdomain (ex: localhost:4321/launch_folder)
 
 // Route to listen root domain (ex: localhost:4321) & replace "launch_folder" by the name of the folder
 app.get('/', (req, res) => { res.render('index', {"launch_folder": launch_folder}); });
 app.get('//', (req, res) => { res.render('index', {"launch_folder": launch_folder}); });
 
 // Route to restart the server
-if (!settings.da) { // If admin token usage is not disabled
+if (!is_debug && !settings.da) { // If not debugging && admin token usage is not disabled
   const restartHandler = (req, res) => { exit_task = "restart"; res.render('simple_msg', {"launch_folder": launch_folder, "message": "Server is restarting..."}); process.exit(0) }
   const gitpullHandler = (req, res) => { exit_task = "gitpull"; res.render('simple_msg', {"launch_folder": launch_folder, "message": "Server is restarting after 'git pull origin main'..."}); process.exit(0) }
   app.get([`/restart/${settings.t}`, `//restart/${settings.t}`], restartHandler);
