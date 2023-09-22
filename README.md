@@ -49,9 +49,17 @@ nohup node server.js > output.log 2>&1 &
 | -m | Enable Minifying public scripts | node server.js -m |
 | -ar | Enable auto-restart | node server.js -ar |
 | -da | Disable admin token usage | node server.js -da |
+| -lr | Log server routes at startup (default : true) | node server.js -lr |
+| -rd | Root domain = Don't use "subdomain" (default : false) | node server.js -rd |
 | -t [String] | Set admin cmd token -> at least 40 chars for security ! | node server.js -t mytoken |
 **Default admin token :**
 *NzQxNzQ2NjEwNjQ0NjQwMzg4XyOg3Q5fJ9v5Kj6Y9o8z0j7z3QJYv6K3c*
+
+**SubDomain management**
+Usefull while using reverse proxy like Nginx, server and files automatically adapted to open
+- https://mywebsite/mysubdomain ( mysubdomain = project folderName )
+If not using subdomain :
+- Use [-rd] to not use this functionnality
 -------------------
 ## ADMIN CMD
 > To use the admin commands, open navigator and access the associated url :

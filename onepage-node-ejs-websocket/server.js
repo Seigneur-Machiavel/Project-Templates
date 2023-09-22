@@ -11,9 +11,10 @@ const settings = {
   p: 4321, // Port
   m: false, // Minify scripts
   ar: false, // Auto restart
-  t: "NzQxNzQ2NjEwNjQ0NjQwMzg4XyOg3Q5fJ9v5Kj6Y9o8z0j7z3QJYv6K3c", // admin Token
   da: false, // Disable admin token usage
-  lr: true, // Log routes
+  lr: false, // Log routes
+  ul: is_debug ? false : true, // Use launch folder as subdomain
+  t: "NzQxNzQ2NjEwNjQ0NjQwMzg4XyOg3Q5fJ9v5Kj6Y9o8z0j7z3QJYv6K3c", // admin Token
 }
 const args = process.argv.slice(2);
 for (let i = 0; i < args.length; i++) {
@@ -25,6 +26,7 @@ for (let i = 0; i < args.length; i++) {
       if (key == "m") { settings.m = true; continue; }
       if (key == "ar") { settings.ar = true; continue; }
       if (key == "lr") { settings.lr = true; continue; }
+      if (key == "rd") { settings.ul = false; continue; } // [root domain] - Don't use launch folder as subdomain
 
       // Move to the next argument
       i++;
@@ -40,7 +42,7 @@ for (let i = 0; i < args.length; i++) {
 //#endregion ----------------------------------------------
 
 //#region - IMPORTS - MODULES - SCRIPTS PUBLIFICATION
-const launch_folder = is_debug ? "" : __dirname.split('\\').pop().split('/').pop();
+const launch_folder = settings.ul ? __dirname.split('\\').pop().split('/').pop() : "";
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
@@ -49,7 +51,7 @@ const WebSocket = require('ws');
 const UglifyJS = require('uglify-js');
 const { exec } = require('child_process');
 //---------------------------------------------------------
-if (!is_debug) { console.log(`launch_folder: ${launch_folder}`) }; // Get the name of the folder where the server is launched
+if (settings.ul) { console.log(`launch_folder: ${launch_folder}`) }; // Get the name of the folder where the server is launched
 let exit_task = ""; // Exit task to execute when the server is exiting
 
 function create_public_version_of_script(filePath, varName = false) {
