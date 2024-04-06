@@ -14,7 +14,8 @@ const settings = {
   da: false, // Disable admin token usage
   lr: false, // Log routes
   ul: is_debug ? false : true, // Use launch folder as subdomain
-  t: "NzQxNzQ2NjEwNjQ0NjQwMzg4XyOg3Q5fJ9v5Kj6Y9o8z0j7z3QJYv6K3c", // admin Token
+  t: "NzQxNzQ2NjEdNjQ0NgQwMzg2XyOg3U5fJ9v5Kj6Y9o8z0j7z3QJYv6K3c", // admin Token
+  cp: false, // Custom path
 }
 const args = process.argv.slice(2);
 for (let i = 0; i < args.length; i++) {
@@ -42,7 +43,9 @@ for (let i = 0; i < args.length; i++) {
 //#endregion ----------------------------------------------
 
 //#region - IMPORTS - MODULES - SCRIPTS PUBLIFICATION
-const launch_folder = settings.ul ? __dirname.split('\\').pop().split('/').pop() : "";
+let launch_folder = settings.ul ? __dirname.split('\\').pop().split('/').pop() : "";
+if (settings.sp) { launch_folder = settings.sp; } // Custom path (sp)
+if (settings.sp || settings.ul) { console.log(`launch_folder: ${launch_folder}`) }; // Get the name of the folder where the server is launched
 const fs = require('fs');
 const path = require('path');
 const express = require('express');

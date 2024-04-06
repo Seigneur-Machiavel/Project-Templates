@@ -14,7 +14,8 @@ const settings = {
   da: false, // Disable admin token usage
   lr: false, // Log routes
   ul: is_debug ? false : true, // Use launch folder as subdomain
-  t: "NzQxNzQ2NjEwNjQ0NjQwMzg4XyOg3Q5fJ9v5Kj6Y9o8z0j7z3QJYv6K3c", // admin Token
+  t: "NzQxNzQ2NjEdNjQ0NgQwMzg2XyOg3U5fJ9v5Kj6Y9o8z0j7z3QJYv6K3c", // admin Token
+  cp: false, // Custom path
 }
 const args = process.argv.slice(2);
 for (let i = 0; i < args.length; i++) {
@@ -42,14 +43,15 @@ for (let i = 0; i < args.length; i++) {
 //#endregion ----------------------------------------------
 
 //#region - IMPORTS - MODULES - SCRIPTS PUBLIFICATION
-const launch_folder = settings.ul ? __dirname.split('\\').pop().split('/').pop() : "";
+let launch_folder = settings.ul ? __dirname.split('\\').pop().split('/').pop() : "";
+if (settings.sp) { launch_folder = settings.sp; } // Custom path (sp)
+if (settings.sp || settings.ul) { console.log(`launch_folder: ${launch_folder}`) }; // Get the name of the folder where the server is launched
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
 const UglifyJS = require('uglify-js');
 const { exec } = require('child_process');
 //---------------------------------------------------------
-if (settings.ul) { console.log(`launch_folder: ${launch_folder}`) }; // Get the name of the folder where the server is launched
 let exit_task = ""; // Exit task to execute when the server is exiting
 
 function create_public_version_of_script(filePath, varName = false) {
@@ -61,7 +63,7 @@ function create_public_version_of_script(filePath, varName = false) {
 
   fileContent = fileContent.replace(/subdomain_prefix|env_ = 'dev'/g, (match) => {
     if (match === 'subdomain_prefix') {
-        return launch_folder != "" ? `"${launch_folder}"` : launch_folder;
+        return `"${launch_folder}"`;
     } else if (match === "env_ = 'dev'") {
         return "env_ = 'prod'";
     }
